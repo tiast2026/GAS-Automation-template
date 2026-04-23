@@ -1,11 +1,18 @@
-# clasp 認証情報（絶対にコミットしない）
+# clasp 認証情報（絶対にコミットしない・旧方式）
 .clasprc.json
 **/.clasprc.json
+
+# Dispatcher のローカル専用認証（コミット版 .claude/gas-dispatcher.json より優先）
+.claude/gas-dispatcher.local.json
 
 # Node
 node_modules/
 npm-debug.log
 package-lock.json
+
+# VitePress build output
+docs/.vitepress/dist/
+docs/.vitepress/cache/
 
 # OS
 .DS_Store
