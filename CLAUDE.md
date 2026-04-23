@@ -17,9 +17,9 @@
 
 ### スプレッドシート ID の抽出
 
-URL 例: `https://docs.google.com/spreadsheets/d/1m_slCKW-k_pcEDW7goMDc7Mt3-gTQBL75mchKU-GOv8/edit#gid=0`
+URL 例: `https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID_XXXXXXXXXXXXXXXXXXXXXXX/edit#gid=0`
 
-→ ID は `1m_slCKW-k_pcEDW7goMDc7Mt3-gTQBL75mchKU-GOv8`（`/d/` と次の `/` の間）。
+→ ID は `YOUR_SPREADSHEET_ID_XXXXXXXXXXXXXXXXXXXXXXX`（`/d/` と次の `/` の間）。
 
 ### GAS プロジェクトの扱い方
 
