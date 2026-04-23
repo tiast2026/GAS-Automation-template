@@ -1,62 +1,91 @@
 # GAS-Automation プロジェクト指示書
 
-このリポジトリは **スプレッドシート URL を受け取って Google Apps Script (GAS) を自動で書き込み・実行・デバッグするためのハブ** です。
+このリポジトリは **スプレッドシート URL を受け取って、Dispatcher GAS（窓口 API）経由で Google Apps Script を自動で書き込み・実行・デバッグするためのハブ** です。
 
 ## 基本ワークフロー
 
-ユーザーがスプレッドシート URL とともに指示を送ってきたら、以下の手順を自動で実行してください。
+### セッション開始時の自動動作
 
-1. URL から `spreadsheetId` を抽出
-2. `scripts/<わかりやすい名前>/` ディレクトリを作成（既にあれば再利用）
-3. 対応する GAS プロジェクト ID を取得または作成
-4. `.clasp.json` を作成
-5. コードを `.gs` / `appsscript.json` として書き込む
-6. `clasp push --force` で反映
-7. エラーが出たら `clasp logs` で確認 → 修正 → 再 push
-8. 成功したら自動で git commit & push（詳細は後述）
+Claude Code はセッション開始時に `.claude/load-dispatcher.sh`（SessionStart フック）を実行し、以下を行います。
 
-### スプレッドシート ID の抽出
+1. `.claude/gas-dispatcher.local.json`（存在すれば優先）または `.claude/gas-dispatcher.json` を読む
+2. 以下のログを出す
 
-URL 例: `https://docs.google.com/spreadsheets/d/1m_slCKW-k_pcEDW7goMDc7Mt3-gTQBL75mchKU-GOv8/edit#gid=0`
-
-→ ID は `1m_slCKW-k_pcEDW7goMDc7Mt3-gTQBL75mchKU-GOv8`（`/d/` と次の `/` の間）。
-
-### GAS プロジェクトの扱い方
-
-GAS プロジェクトは2種類あるが、**このリポジトリではコンテナバインドをデフォルト** とする。「拡張機能 → Apps Script」から開く運用に揃えるため。
-
-**パターン B: コンテナバインド GAS（デフォルト・推奨）**
-
-手順:
-1. ユーザーからスプレッドシートURLを受け取る
-2. 対象スプレッドシートに既にGASが存在するか確認（ユーザーに質問）
-3. 既存なし → ユーザーに以下を案内:
-   > スプレッドシートを開いて「拡張機能 → Apps Script」を開き、URLの `/projects/` の後ろにある文字列（スクリプトID）を教えてください。
-4. 既存あり → ユーザーから同様にスクリプトIDをもらう
-5. `scripts/<プロジェクト名>/.clasp.json` を手動作成:
-   ```json
-   {
-     "scriptId": "<スクリプトID>",
-     "rootDir": "."
-   }
-   ```
-6. `appsscript.json` と `.gs` ファイルを配置
-7. `clasp push --force` で反映
-8. 動作確認は スプレッドシートの「拡張機能 → Apps Script」から開いて手動実行
-
-**パターン A: スタンドアロン GAS（例外時のみ）**
-
-以下の場合にのみスタンドアロンを選ぶ:
-- 複数のスプレッドシートを横断する処理
-- スプレッドシートに依存しないバッチ処理（BigQuery直接操作など）
-- ユーザーが明示的に「スタンドアロンで」と指定
-
-```bash
-cd scripts/<プロジェクト名>
-clasp create --type standalone --title "<日本語タイトル>" --rootDir .
+```
+[gas-dispatcher] loaded from .claude/gas-dispatcher.json url=https://script.google.com/macros/s/.../exec
 ```
 
-### appsscript.json のデフォルト
+このログが出ていれば、以降のリクエストで `url` と `token` をこのファイルから読んで Dispatcher に HTTP POST できる状態です。
+
+### ユーザーからの依頼を受けたら
+
+ユーザーがスプレッドシート URL とともに指示を送ってきたら、以下を自動で実行してください。
+
+1. **Dispatcher の生存確認**: `ping` エンドポイントを叩く（初回リクエストのみで十分）
+2. **シート構造の把握**: `listTabs` / `describeTab` / `readTab` で既存タブや列構成を確認
+3. **目的に応じて API を選択**:
+   - 読み取り・集計 → `readTab` / `readCell` → メモリで処理 → チャット回答
+   - 一度だけの処理 → `runScript`（使い捨て実行）
+   - 継続利用のロジック → `writeBoundScript`（コンテナバインド GAS に保存）
+   - トリガー設定 → `installTimeTrigger` / `installSheetTrigger`
+4. **エラーが出たら**: Apps Script の実行ログを取得 → 原因特定 → コード修正 → 再実行
+5. **成功したら**: 自動で git commit & push（詳細は後述）
+
+### Dispatcher API の叩き方
+
+常に以下の形式で POST する。URL とトークンは `.claude/gas-dispatcher.json` から取得。
+
+```bash
+URL=$(jq -r .url .claude/gas-dispatcher.json)
+TOKEN=$(jq -r .token .claude/gas-dispatcher.json)
+curl -sS -X POST "$URL" \
+  -H "Content-Type: application/json" \
+  -d "{\"token\":\"$TOKEN\",\"action\":\"ping\",\"params\":{}}"
+```
+
+レスポンスは常に `{"ok":true, "result":...}` または `{"ok":false, "error":{"code":..., "message":...}}`。成功・失敗の判定は `ok` フィールドで行う。
+
+アクション一覧は `docs/appendix/dispatcher-api.md`（付録 B）を正典として参照する。
+
+### シート URL の扱い
+
+スプレッドシート URL は **そのまま** Dispatcher に渡す（`spreadsheetId` の抽出は Dispatcher 側で行う）。ユーザーのプロンプトに含まれる URL は原則以下の形式。
+
+```
+https://docs.google.com/spreadsheets/d/<ID>/edit#gid=0
+```
+
+`/edit` や `#gid=0` が含まれていても問題なく処理される。ID だけ貼られた場合は `https://docs.google.com/spreadsheets/d/<ID>/edit` の形に組み立ててから渡す。
+
+## GAS プロジェクトの扱い方
+
+### デフォルト: コンテナバインド GAS（パターン B）
+
+**このリポジトリではコンテナバインドをデフォルト** とします。スプレッドシートを開いて「拡張機能 → Apps Script」から辿れるため運用しやすい。
+
+手順:
+
+1. ユーザーからスプレッドシート URL を受け取る
+2. `getBoundScript` で既存コードを取得（未バインドなら `{files: []}` 相当が返る）
+3. 既存コードがあれば内容を読み、差分マージで書き換える
+4. `writeBoundScript` でコードを保存（複数ファイル可）
+5. 動作確認は `runScript` で関数を直接呼ぶ、または `installTimeTrigger` / `installSheetTrigger` でトリガー化
+
+ローカルにコードのバックアップを残したい場合は `scripts/<プロジェクト名>/` に `.gs` と `appsscript.json` を配置してコミット。`.clasp.json` は **不要**（Dispatcher がシート URL で識別するため）。
+
+### 例外: スタンドアロン GAS（パターン A）
+
+以下の場合のみスタンドアロンを選ぶ:
+
+- 複数のスプレッドシートを横断する処理
+- スプレッドシートに依存しないバッチ処理（BigQuery 直接操作など）
+- ユーザーが明示的に「スタンドアロンで」と指定した場合
+
+スタンドアロン GAS を新規作成したい場合は、ユーザーにブラウザで [script.google.com](https://script.google.com) から作ってもらい、スクリプト ID を `scripts/<プロジェクト名>/dispatcher.json` に記録した上で、Dispatcher の `runScript` を Apps Script API 経由で呼ぶ設計にする。ほとんどの業務はコンテナバインドで足りるので、この経路は例外的。
+
+## appsscript.json のデフォルト
+
+保存型で書く際の `appsscript.json` はこれをベースにする。
 
 ```json
 {
@@ -67,17 +96,33 @@ clasp create --type standalone --title "<日本語タイトル>" --rootDir .
 }
 ```
 
-スプレッドシート操作が必要なら `oauthScopes` に以下を追加:
+スプレッドシート操作・外部 API 呼び出しが必要なら `oauthScopes` を追加:
+
 - `https://www.googleapis.com/auth/spreadsheets`
 - `https://www.googleapis.com/auth/script.external_request`
+
+トリガーを張る場合は追加で:
+
+- `https://www.googleapis.com/auth/script.scriptapp`
 
 ## コーディング規約
 
 - 関数名は英語 camelCase、ファイル名は日本語も可
-- トリガーは `setupTriggers()` 関数に集約
+- トリガーは `setupTriggers()` 関数に集約し、手動実行で全トリガー再設置できるように
 - API 呼び出しヘルパーは共通化
 - 冗長なコメントは書かない、シンプルで直接実行可能なコードを優先
-- API キーは `PropertiesService.getScriptProperties()` を使う
+- API キーは `PropertiesService.getScriptProperties()` を使う。コードに直書き禁止
+
+## 破壊的操作の扱い
+
+以下の操作は **事前にユーザー確認を入れてから** 実行する。
+
+- `clearTab`（タブ全クリア）
+- タブ削除を含む処理
+- 既存 `writeBoundScript` 内容を大幅に上書きするケース
+- 10,000 行を超える範囲への `writeRange`
+
+「先にサマリを見せて、問題なければ実行」の二段階で進める。
 
 ## Git 自動 commit & push ルール【重要】
 
@@ -87,10 +132,10 @@ clasp create --type standalone --title "<日本語タイトル>" --rootDir .
 
 以下のいずれかを完了した直後、必ず自動で `git add . && git commit && git push` を実行する。ユーザーへの確認は不要。
 
-1. `clasp push --force` が成功した時
-2. `.gs` / `appsscript.json` / `.clasp.json` を新規作成・更新した時
-3. `CLAUDE.md` / `README.md` などのドキュメントを更新した時
-4. `scripts/` 配下に新規プロジェクトディレクトリを作成した時
+1. Dispatcher 経由でコード（`writeBoundScript` 含む）を書き換え、動作確認まで成功した時
+2. `scripts/` 配下に新規プロジェクトディレクトリ・`.gs` ・ `appsscript.json` を作成・更新した時
+3. `CLAUDE.md` / `README.md` / `docs/**` などのドキュメントを更新した時
+4. `.claude/settings.json` / `.claude/load-dispatcher.sh` などの設定を更新した時
 
 ### コミットメッセージ規約
 
@@ -112,46 +157,38 @@ git commit -m "<type>(<scope>): <概要>"
 git push origin main
 ```
 
-push競合時は `git pull --rebase origin main` してから再push。
+push 競合時は `git pull --rebase origin main` してから再 push。
 
 ### やってはいけないこと
 
 - コミットメッセージを省略する・適当に書く
-- `git push --force` の使用
-- `.clasprc.json` や機密ファイルを commit する
-- 作業途中の未完成コードを commit する（`clasp push` が成功してから）
-
-## 実行コマンド早見表
-
-```bash
-clasp push --force          # コードを反映
-clasp logs                  # ログを見る
-clasp open-script           # Apps Script エディタを開く
-clasp status                # プロジェクト情報
-clasp show-authorized-user  # 認証中のユーザー確認
-```
-
-## 関数実行について（clasp 3.x の制約）
-
-clasp 3.x では `clasp run` に GCP プロジェクトの紐付けが必須で手間が増えるため、**`clasp run` は使わない**。代わりに:
-
-1. **動作確認**: `clasp open-script` で Apps Script エディタを開き、関数を手動実行
-2. **本番運用**: `setupTriggers()` 関数でトリガー自動実行
-3. **Web 実行**: 必要なら `doGet()` `doPost()` で WebApp 化
-
-エラー確認は `clasp logs` で行う。
+- `git push --force` の使用（明示指示があった場合のみ）
+- `.claude/gas-dispatcher.local.json` など機密ファイルを commit する
+- 作業途中の未完成コードを commit する（Dispatcher 経由の動作確認が成功してから）
 
 ## エラー時の対応フロー
 
-1. `clasp logs` で直近のログを取得
-2. スタックトレースから該当行を特定
-3. 修正を `.gs` ファイルに適用
-4. `clasp push --force` で再反映
-5. `clasp open-script` で Apps Script エディタを開き、関数を手動実行して再検証
-6. 解決したら自動 commit & push
-7. 解決するまで 1-5 を繰り返す
+1. Dispatcher のレスポンス `error.code` / `error.message` を確認
+2. `code` 別の初手:
+   - `UNAUTHORIZED` → `.claude/gas-dispatcher.json` の `token` と Apps Script スクリプトプロパティ `SECRET_TOKEN` の一致を確認
+   - `NOT_FOUND` → タブ名・シート URL の typo を `listTabs` で検証
+   - `PERMISSION_DENIED` → Dispatcher 実行ユーザーのシート編集権限を確認
+   - `TIMEOUT` → 6 分制限。処理を分割してトリガーチェーン化
+   - `INTERNAL_ERROR` → `error.message` のスタックトレースから該当行を修正
+3. 修正後 `writeBoundScript` で再反映
+4. `runScript` で再検証
+5. 解決したら自動 commit & push
+
+## 参考資料
+
+- `docs/appendix/dispatcher-api.md` — Dispatcher API 完全リファレンス
+- `docs/appendix/security.md` — private 前提の運用とローテ手順
+- `docs/appendix/legacy-clasp.md` — 旧 clasp 方式からの移行ガイド
+- `scripts/_dispatcher/` — Dispatcher 本体のソース（ブラウザで Deploy する元ファイル）
 
 ## セキュリティ
 
-- **`.clasprc.json` は絶対に Git に commit しない**（`.gitignore` で対策済み）
-- API キーはスクリプト内に直書きしない
+- **リポジトリは必ず private**。public 化する場合は [付録 C](docs/appendix/security.md) のローテ手順を先に実施
+- **`.claude/gas-dispatcher.local.json` は絶対に commit しない**（`.gitignore` 済）
+- `SECRET_TOKEN` は 64 文字以上のランダム文字列
+- API キーはスクリプト内に直書きせず、`PropertiesService.getScriptProperties()` を使う
