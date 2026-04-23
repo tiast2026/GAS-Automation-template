@@ -1,0 +1,21 @@
+# clasp 認証情報（絶対にコミットしない）
+.clasprc.json
+**/.clasprc.json
+
+# Node
+node_modules/
+npm-debug.log
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# エディタ
+.vscode/
+.idea/
+*.swp
+
+# ローカル環境変数
+.env
+.env.local
