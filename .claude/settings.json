@@ -1,19 +1,32 @@
 {
   "permissions": {
     "allow": [
-      "Bash(clasp *)",
       "Bash(npm install *)",
       "Bash(npm run *)",
       "Bash(mkdir *)",
       "Bash(ls *)",
       "Bash(cat *)",
       "Bash(cd *)",
-      "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(git push *)",
-      "Bash(git pull *)",
-      "Bash(git status *)",
-      "Bash(git log *)"
+      "Bash(curl *)",
+      "Bash(bash scripts/call-dispatcher.sh *)",
+      "Bash(bash scripts/sync-bound-scripts.sh *)",
+      "Bash(bash scripts/register-sheet-script.sh *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CONFIG=.claude/gas-dispatcher.local.json; [ -f \"$CONFIG\" ] || CONFIG=.claude/gas-dispatcher.json; if [ -f \"$CONFIG\" ]; then export GAS_DISPATCHER_URL=$(jq -r .url \"$CONFIG\" 2>/dev/null); export GAS_DISPATCHER_TOKEN=$(jq -r .token \"$CONFIG\" 2>/dev/null); echo \"[gas-dispatcher] loaded from $CONFIG url=${GAS_DISPATCHER_URL:0:40}...\"; else echo \"[gas-dispatcher] no config found (.claude/gas-dispatcher.json or .local.json). See docs/guide/02-setup.md\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "[ -f scripts/sync-bound-scripts.sh ] && bash scripts/sync-bound-scripts.sh 2>&1 || true"
+          }
+        ]
+      }
     ]
   }
 }

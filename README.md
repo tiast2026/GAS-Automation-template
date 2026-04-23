@@ -1,21 +1,24 @@
-# GAS-Automation Template
+# GAS-Automation-template
 
-Claude Code × スプレッドシート GAS 自動化ガイド 用のテンプレートリポジトリです。
+Claude Code × スプレッドシート GAS 自動化環境のテンプレート。
 
-## 使い方
+## クイックスタート
 
-このリポジトリ右上の **「Use this template」** ボタンから、自分のアカウントにリポジトリを複製してください。
+右上の **「Use this template」** からあなた専用のリポジトリを作り、
+[公開ガイド](https://gas-automation.vercel.app) の
+**第 2 章: 5 分セットアップ** に従って Dispatcher をデプロイしてください。
 
-詳しい使い方は以下のガイドサイトを参照してください。
+必要なのはブラウザだけ。Node.js / clasp のインストールは不要です。
 
-**ガイドサイト**: （Vercelデプロイ後にURLを記入）
+## 派生リポジトリを必ず private に
 
-## このテンプレートに含まれるもの
+このテンプレートから作るあなた専用リポジトリは **必ず private** に
+してください。Dispatcher の URL とトークンをコミットする運用のため、
+public にすると認証情報が漏洩します。
 
-- `CLAUDE.md` - Claude Code への指示書
-- `.claude/settings.json` - Claude Code のコマンド実行権限設定
-- `.gitignore` - 認証ファイルなどを除外
-- `scripts/` - 各GASプロジェクトを配置するディレクトリ
+詳細は
+[付録 C: セキュリティ詳細](https://gas-automation.vercel.app/appendix/security)
+を参照。
 
 ## ライセンス
 

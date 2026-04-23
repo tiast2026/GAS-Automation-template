@@ -19,3 +19,10 @@ Thumbs.db
 # ローカル環境変数
 .env
 .env.local
+
+# 窓口 GAS のローカル上書き用（.claude/gas-dispatcher.json を個別に差し替えたい場合）
+.claude/gas-dispatcher.local.json
+
+# VitePress
+docs/.vitepress/dist/
+docs/.vitepress/cache/

@@ -1,0 +1,4 @@
+{
+  "comment": "シート ID → コンテナバインド スクリプト ID のマッピング。SessionStart で Dispatcher に同期される。新規シート登録時は scripts/register-sheet-script.sh を使うと自動追記される。",
+  "entries": {}
+}
