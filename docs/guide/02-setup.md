@@ -7,240 +7,215 @@ next:
   link: '/guide/03-verify'
 ---
 
-# 第2章: 5 分セットアップ
+# 第2章: セットアップ
 
-このガイド最大の山場ですが、実作業は **ブラウザだけで 5 〜 10 分** です。PC にソフトを入れたり、認証ファイルをアップロードしたりする工程はありません。
+やることは **4 つだけ** 。 **ブラウザで 3 手動作業 → Claude に 1 回指示を投げるだけ** で終わります。
 
-## ステップ全体像
+<div class="action-legend">
+  <div class="legend-item"><span class="legend-dot manual"></span>あなたが手でやる（ブラウザ）</div>
+  <div class="legend-item"><span class="legend-dot claude"></span>Claude に丸投げ（プロンプトコピペ）</div>
+  <div class="legend-item"><span class="legend-dot verify"></span>確認するだけ</div>
+</div>
 
-| Step | 内容 | 目安時間 |
-|---|---|---|
-| 1 | アカウント確認 | 1 分 |
-| 2 | GitHub リポジトリを作る（private）| 1 分 |
-| 3 | 窓口 GAS（Dispatcher）を Deploy | 5 分 |
-| 4 | 接続情報をリポジトリにコミット | 1 分 |
-| 5 | Claude Code で接続確認 | 1 分 |
+## 全体像
 
----
+| Step | 内容 | 担当 | 目安 |
+|---|---|---|---|
+| 1 | GitHub で private リポジトリを作る | <span class="action-badge manual">手動</span> | 1 分 |
+| 2 | Apps Script で Dispatcher を Deploy | <span class="action-badge manual">手動</span> | 5 分 |
+| 3 | URL とトークンをメモ | <span class="action-badge manual">手動</span> | 30 秒 |
+| 4 | Claude に登録＆疎通確認を依頼 | <span class="action-badge claude">Claude</span> | 1 分 |
 
-## Step 1: アカウント確認
-
-以下 3 つが揃っていれば、この Step はスキップして Step 2 へ。
-
-| アカウント | 用途 | 料金 |
-|---|---|---|
-| Google | スプレッドシート / GAS の操作 | 無料（業務用推奨） |
-| GitHub | コードと接続情報の保管 | 無料 |
-| Claude（Anthropic）| Claude Code の利用 | Pro 以上のサブスクリプション |
-
-### Google アカウント
-
-業務データを扱うなら **業務用の Google Workspace アカウント** を強く推奨します。プライベート用 Gmail と業務データを混ぜないため。
-
-会社から配布されている Google Workspace アカウントがあれば、それを使ってください。
-
-### GitHub アカウント
-
-未作成なら [github.com/signup](https://github.com/signup) から登録（無料、1 分）。2 要素認証は後からでも設定できますが、有効化を強く推奨します。
-
-### Claude アカウント
-
-[claude.ai](https://claude.ai) でサインアップ。Claude Code を使うには **Pro プラン以上** が必要です（Free プランでは Claude Code 機能が開放されません）。
-
----
-
-## Step 2: GitHub リポジトリを作る
-
-テンプレートリポジトリ（必要な Dispatcher コードと設定一式が揃った雛形）から作ります。
-
-1. ブラウザで [https://github.com/tiast2026/GAS-Automation-template](https://github.com/tiast2026/GAS-Automation-template) を開く
-2. 右上の緑色のボタン **「Use this template」** → **「Create a new repository」**
-3. リポジトリ名は任意（例: `gas-automation`）
-4. 公開範囲は **必ず「Private」** を選ぶ
-5. **「Create repository」** をクリック
-
-::: danger 必ず Private を選ぶ
-この後のステップで **Dispatcher の URL とトークンをコミット** します。Public リポジトリにすると、その時点で誰でもあなたのスプレッドシートを読み書きできる状態になります。
-
-「あとで Public に切り替える」のも NG です。切り替えるには URL とトークンを先にローテーションする必要があります（[付録 C](/appendix/security) 参照）。
+::: tip 事前に揃えるもの
+Google アカウント（業務用推奨）、GitHub アカウント（無料）、Claude Pro 以上のサブスクリプション。以下のリンクから登録してください。
+- [GitHub サインアップ](https://github.com/signup)
+- [Claude サインアップ](https://claude.ai)
 :::
 
-テンプレート作成時に以下のファイルがコピーされます。
+---
 
-| ファイル | 役割 |
-|---|---|
-| `CLAUDE.md` | Claude Code への全体指示書 |
-| `.claude/settings.json` | SessionStart フックの設定 |
-| `scripts/_dispatcher/Code.gs` | **Dispatcher の本体コード** |
-| `scripts/_dispatcher/appsscript.json` | Dispatcher のマニフェスト |
-| `docs/` | このドキュメントサイト（VitePress）|
+<div class="step-card manual">
+
+## Step 1: GitHub で private リポジトリを作る <span class="action-badge manual">あなたが手でやる</span>
+
+テンプレートリポジトリから 30 秒で作れます。
+
+1. [https://github.com/tiast2026/GAS-Automation-template](https://github.com/tiast2026/GAS-Automation-template) を開く
+2. 右上の **「Use this template」** → **「Create a new repository」**
+3. リポジトリ名は任意（例: `gas-automation`）、公開範囲は **必ず Private**
+4. **「Create repository」**
+
+<div class="image-slot">
+  <strong>📸 画像募集中</strong>
+  GitHub の「Use this template」ボタン → 「Create a new repository」画面
+</div>
+
+::: danger 必ず Private
+この後 **Dispatcher の URL とトークンをコミット** します。Public にすると誰でもあなたのシートを操作できる状態になります。
+:::
+
+</div>
 
 ---
 
-## Step 3: 窓口 GAS（Dispatcher）を Deploy
+<div class="step-card manual">
 
-ここが本作業。ブラウザで Apps Script のデプロイ画面を 1 往復するだけです。
+## Step 2: Apps Script で Dispatcher を Deploy <span class="action-badge manual">あなたが手でやる</span>
 
-### 3-1. 空の Apps Script プロジェクトを作る
+ここが本作業。ブラウザで **1 往復で 5 分** 程度。
 
-1. [https://script.google.com/home](https://script.google.com/home) を開く
-2. 左上 **「+ 新しいプロジェクト」** をクリック
-3. プロジェクト名を **`GAS Dispatcher`** に変更（画面上部のタイトルをクリック）
+### 2-1. 空のプロジェクトを作る
 
-### 3-2. コードを貼り付け
+1. [https://script.google.com/home](https://script.google.com/home) → 左上 **「+ 新しいプロジェクト」**
+2. プロジェクト名を **`GAS Dispatcher`** に変更
 
-1. GitHub で Step 2 で作ったリポジトリを開く
-2. `scripts/_dispatcher/Code.gs` を開く → 右上の **「Copy raw contents」** アイコンで全文コピー
-3. Apps Script エディタに戻り、左の **`コード.gs`** をクリック
-4. 既存内容を全選択して削除
-5. コピーした内容を貼り付け
-6. `Ctrl + S`（Mac は `Cmd + S`）で保存
+<div class="image-slot">
+  <strong>📸 画像募集中</strong>
+  Apps Script ホームの「+ 新しいプロジェクト」ボタン
+</div>
 
-### 3-3. マニフェスト（appsscript.json）を表示・編集
+### 2-2. コードを貼り付け
 
-1. Apps Script エディタ左の **歯車アイコン（プロジェクトの設定）**
-2. **「『appsscript.json』マニフェスト ファイルをエディタで表示する」** にチェック
-3. エディタに戻り、**`appsscript.json`** タブをクリック
-4. GitHub で `scripts/_dispatcher/appsscript.json` の内容をコピーして貼り付け
-5. `Ctrl + S` で保存
+1. Step 1 で作った GitHub リポジトリを開く
+2. `scripts/_dispatcher/Code.gs` を開き、右上 **「Copy raw contents」** で全文コピー
+3. Apps Script に戻り、左の **`コード.gs`** をクリック → 既存を全選択削除 → 貼り付け → `Ctrl + S`（Mac は `Cmd + S`）
 
-### 3-4. シークレットトークンを生成して設定
+<div class="image-slot">
+  <strong>📸 画像募集中</strong>
+  GitHub の「Copy raw contents」アイコンの位置
+</div>
 
-Dispatcher の認証に使うランダムな文字列を発行します。
+### 2-3. マニフェスト（appsscript.json）も貼り付け
 
-**トークンを作る方法（どれでも可）:**
+1. Apps Script 左の **歯車アイコン**
+2. **「『appsscript.json』マニフェストファイルをエディタで表示する」** にチェック
+3. エディタの **`appsscript.json`** タブで、GitHub の `scripts/_dispatcher/appsscript.json` の内容を貼り付け → 保存
 
-- ブラウザの開発者コンソール（F12）で `crypto.randomUUID() + crypto.randomUUID()` を実行してコピー
-- ターミナルが使えるなら `openssl rand -hex 32`
-- [https://1password.com/password-generator/](https://1password.com/password-generator/) 等の生成サイト
+<div class="image-slot">
+  <strong>📸 画像募集中</strong>
+  プロジェクトの設定 →「appsscript.json マニフェストを表示」のチェック
+</div>
 
-**64 文字程度のランダム文字列** を控えておきます。
+### 2-4. トークンを生成してスクリプトプロパティに登録
 
-**Apps Script 側に登録:**
+ブラウザの F12 → コンソールで以下を実行してコピー:
 
-1. 歯車アイコン（プロジェクトの設定）
-2. 下のほう **「スクリプト プロパティ」** → **「スクリプト プロパティを追加」**
-3. 入力:
-   - **プロパティ**: `SECRET_TOKEN`
-   - **値**: 先ほど生成したランダム文字列
-4. **「スクリプト プロパティを保存」**
+```js
+crypto.randomUUID() + crypto.randomUUID()
+```
 
-### 3-5. Google Apps Script API を有効化
+Apps Script 側:
 
-Dispatcher から各シートのコンテナバインド GAS を書き換えるために必要です。アカウント単位の設定。
+1. 歯車アイコン → 下にスクロール → **「スクリプト プロパティ」** → **「スクリプト プロパティを追加」**
+2. プロパティ: `SECRET_TOKEN` 、値: 上で生成した文字列
+3. **「スクリプト プロパティを保存」**
 
-1. [https://script.google.com/home/usersettings](https://script.google.com/home/usersettings) を開く
-2. **「Google Apps Script API」** を **ON** にする
+<div class="image-slot">
+  <strong>📸 画像募集中</strong>
+  スクリプトプロパティに SECRET_TOKEN を追加する画面
+</div>
 
-### 3-6. ウェブアプリとしてデプロイ
+### 2-5. Apps Script API を ON
+
+1. [https://script.google.com/home/usersettings](https://script.google.com/home/usersettings)
+2. **「Google Apps Script API」** を **ON**
+
+<div class="image-slot">
+  <strong>📸 画像募集中</strong>
+  Google Apps Script API の ON/OFF トグル画面
+</div>
+
+### 2-6. ウェブアプリとしてデプロイ
 
 1. エディタ右上 **「デプロイ」** → **「新しいデプロイ」**
-2. 左側の **歯車アイコン** → **「ウェブアプリ」** を選択
+2. 左の **歯車アイコン** → **「ウェブアプリ」**
 3. 設定:
-   - **説明**: `GAS Dispatcher v1`（任意）
-   - **実行するユーザー**: **自分** ← 重要
-   - **アクセスできるユーザー**: **全員** ← 重要（トークンで保護されるので安全）
-4. 右下 **「デプロイ」**
+   - **実行するユーザー**: **自分**
+   - **アクセスできるユーザー**: **全員**（トークンで守るので OK）
+4. **「デプロイ」**
 
-### 3-7. OAuth 同意
+<div class="image-slot">
+  <strong>📸 画像募集中</strong>
+  新しいデプロイ画面（実行=自分 / アクセス=全員）
+</div>
 
-初回デプロイ時に「アクセスを承認」ボタンが出ます。
+### 2-7. OAuth 同意 & URL コピー
 
-1. クリック → Google アカウント選択
-2. 「このアプリは Google で確認されていません」画面が出たら:
-   - **「詳細」** をクリック
-   - **「〜に移動（安全ではないページ）」** をクリック
-3. 権限リストを確認して **「許可」**
+初回のみ「アクセスを承認」が出ます。
+
+1. Google アカウントを選ぶ
+2. 「このアプリは Google で確認されていません」→ **「詳細」** → **「〜に移動（安全ではないページ）」**
+3. 権限リスト → **「許可」**
+4. 完了画面で表示された **ウェブアプリ URL をコピー**
+
+<div class="image-slot">
+  <strong>📸 画像募集中</strong>
+  「安全ではないページに移動」の警告画面とデプロイ完了時の URL 表示
+</div>
 
 ::: tip 「安全ではない」表示について
-これは Google が未審査の自作 GAS に対して常に出す警告です。**自分で書いた自分用の GAS なので安全** 。他人が作った GAS では絶対にやらないでください。
+Google が未審査の自作 GAS に対して常に出す警告です。**自分で書いた自分用の GAS なので安全** 。他人が作った GAS では絶対にやらないでください。
 :::
 
-### 3-8. URL をコピー
+</div>
 
-デプロイ完了画面で以下が表示されます。
+---
+
+<div class="step-card manual">
+
+## Step 3: URL とトークンをメモ <span class="action-badge manual">あなたが手でやる</span>
+
+Step 2 で得た以下 2 つを手元に控えておきます。次の Step でそのまま貼り付けます。
+
+- **URL**: `https://script.google.com/macros/s/XXXXXXXXXXXX/exec`
+- **Token**: Step 2-4 で生成したランダム文字列
+
+</div>
+
+---
+
+<div class="step-card claude">
+
+## Step 4: Claude に丸投げ <span class="action-badge claude">Claude に指示</span>
+
+ここからはコードを書かなくて OK。 **プロンプトを 1 回投げるだけ** 。
+
+1. [claude.ai](https://claude.ai) → 左メニューの **Code** を開く
+2. **Connect GitHub** から Step 1 のリポジトリを接続（初回のみ）
+3. リポジトリを選んで **New session**
+4. 下をコピーして、URL と Token を実際の値に差し替えて送信:
+
+<div class="prompt-label">📋 Claude にそのまま貼り付け</div>
 
 ```
-ウェブアプリ
+Dispatcher を登録してください。以下の 2 つを .claude/gas-dispatcher.json
+として main にコミット＆push し、そのあと ping で疎通確認までお願いします。
+
 URL: https://script.google.com/macros/s/XXXXXXXXXXXX/exec
+Token: ここに Step 2-4 で生成したトークン
 ```
 
-この URL をコピーして控えておきます。
+Claude がやること:
 
----
+- `.claude/gas-dispatcher.json` を作成
+- `main` ブランチにコミット & push
+- `ping` を叩いて、あなたの Google メアドとタイムゾーンを返答
 
-## Step 4: 接続情報をリポジトリにコミット
+<div class="image-slot">
+  <strong>📸 画像募集中</strong>
+  Claude Code が ping 成功を報告しているセッション画面
+</div>
 
-Step 3 で得た **URL** と **トークン** をリポジトリに書き込みます。
+Claude が「ping 成功。メアド ◯◯、タイムゾーン Asia/Tokyo」のように返してきたら **セットアップ完了** 。
 
-### GitHub Web UI で直接作る（おすすめ）
-
-ローカル clone も git も不要。ブラウザだけで完結します。
-
-1. Step 2 で作ったリポジトリを GitHub で開く
-2. 上部 **「Add file」** → **「Create new file」**
-3. ファイル名欄に `.claude/gas-dispatcher.json` と入力（スラッシュを打つとフォルダ扱いになります）
-4. 中身に以下を貼り付け、URL とトークンを実際の値に差し替え
-
-```json
-{
-  "url": "https://script.google.com/macros/s/XXXXXXXXXXXX/exec",
-  "token": "ここに Step 3-4 で生成したトークン"
-}
-```
-
-5. 下までスクロール → **「Commit changes」** → デフォルトメッセージのまま **「Commit directly to the main branch」** で OK
-
-これで準備は完了。
-
-### ローカルで作りたい場合
-
-```bash
-git clone git@github.com:<your>/<repo>.git
-cd <repo>
-mkdir -p .claude
-cat > .claude/gas-dispatcher.json <<'EOF'
-{
-  "url": "https://script.google.com/macros/s/XXXXXXXXXXXX/exec",
-  "token": "あなたのトークン"
-}
-EOF
-git add .claude/gas-dispatcher.json
-git commit -m "Add dispatcher connection info"
-git push
-```
-
-### 補足: 個人端末で別 Dispatcher を使いたいとき
-
-`.claude/gas-dispatcher.local.json`（`.gitignore` 済み、コミットされない）を同じフォーマットで作ると、こちらが優先されます。テスト用 Deploy や本番切替の検証に便利。
-
----
-
-## Step 5: Claude Code で接続確認
-
-1. [claude.ai](https://claude.ai) にログイン → 左メニューの **Code** を開く
-2. **Connect GitHub** から Step 2 のリポジトリを接続（初回のみ）
-3. リポジトリを選んで **New session** を開始
-4. セッション開始直後のログに以下が出れば成功:
-
-```
-[gas-dispatcher] loaded from .claude/gas-dispatcher.json url=https://script.google.com/macros/s/...
-```
-
-セッション内に以下を投げて動作確認:
-
-```
-窓口 GAS（Dispatcher）の疎通確認をお願いします。
-```
-
-Claude が `ping` エンドポイントを叩いて、あなたの Google アカウントのメールアドレスとタイムゾーンを返してきたら **セットアップ完了** です。
-
-::: tip `loaded from ...` が出ないとき
-- `.claude/gas-dispatcher.json` が `main` ブランチにコミットされているか GitHub 上で確認
-- JSON の構文エラー（カンマ忘れ、クォート抜け）がないか確認
-- Claude Code で「このリポジトリの `.claude/gas-dispatcher.json` の中身を見せて」と依頼して内容確認
-- それでもダメなら [第 5 章: トラブル & FAQ](/guide/05-troubleshoot-faq) へ
+::: tip うまくいかないとき
+- リポジトリが Private になっているか再確認
+- URL が `/exec` で終わっているか
+- Token のコピペに空白や改行が混ざっていないか
+- それでもダメなら [第 5 章: トラブル & FAQ](/guide/05-troubleshoot-faq)
 :::
+
+</div>
 
 ---
 
