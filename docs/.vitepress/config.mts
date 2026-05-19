@@ -52,6 +52,7 @@ export default defineConfig({
             { text: 'A: 旧 clasp 方式について', link: '/appendix/legacy-clasp' },
             { text: 'B: Dispatcher API リファレンス', link: '/appendix/dispatcher-api' },
             { text: 'C: セキュリティ詳細', link: '/appendix/security' },
+            { text: 'D: セミナー資料 (Claude × GitHub × Vercel)', link: '/appendix/seminar' },
           ]
         }
       ]
