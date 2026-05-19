@@ -120,6 +120,50 @@
   }
   .step .body { flex: 1; }
   .step h3 { margin: 0 0 4px; }
+
+  .terms {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+  @media (max-width: 640px) { .terms { grid-template-columns: 1fr; } }
+  .term {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .term .name { font-weight: 700; color: var(--accent); font-size: 1.05rem; }
+  .term .name small { color: var(--muted); font-weight: 400; font-size: 0.85em; margin-left: 4px; }
+  .term .visual {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 16px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 80px;
+    font-size: 0.9rem;
+    text-align: center;
+    color: var(--ink);
+  }
+  .term .visual .box {
+    background: white;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    padding: 8px 10px;
+    min-width: 64px;
+  }
+  .term .visual .box.hi { border-color: var(--accent); background: #eff6ff; }
+  .term .visual .box.warn { border-color: #ca8a04; background: #fef9c3; }
+  .term .visual .box.ok { border-color: #16a34a; background: #dcfce7; }
+  .term .visual .arrow { font-size: 1.3rem; color: #6b7280; }
+  .term .desc { font-size: 0.92rem; line-height: 1.6; }
   footer {
     margin-top: 64px;
     padding-top: 24px;
@@ -135,39 +179,72 @@
 
 <header>
   <h1>Claude × GitHub × Vercel ことはじめ</h1>
-  <p class="lead">3つの道具がどう協力して「サイトが公開される」までを作るか、図でわかる入門ガイド</p>
+  <p class="lead">3つの道具がどう協力して「システムが動き出す」までを作るか、図でわかる入門ガイド</p>
 </header>
 
 <h2>1. まず、登場人物は3人だけ</h2>
-<p>難しく考えなくて大丈夫です。家を建てるのに「大工さん・倉庫・お店の人」がいるのと同じで、ウェブサイトを作って公開するにも 3 つの役割があります。</p>
+<p>難しく考えなくて大丈夫です。家を建てるのに「大工さん・倉庫・お店の人」がいるのと同じで、システム（Web アプリ・社内ツール・サービス等）を作って動かすにも 3 つの役割があります。</p>
 
 <div class="roles">
   <div class="role claude">
     <div class="icon">🤖</div>
-    <h3>Claude</h3>
+    <h3>Claude <small style="font-weight:400;color:#6b7280;">／ クロード</small></h3>
     <p class="sub">大工さん</p>
     <p>あなたの指示でコードを書いてくれる AI。設計図どおりに「家（コード）」を組み立てる職人さん。</p>
   </div>
   <div class="role github">
     <div class="icon">📦</div>
-    <h3>GitHub</h3>
+    <h3>GitHub <small style="font-weight:400;color:#6b7280;">／ ギットハブ</small></h3>
     <p class="sub">倉庫＆履歴ノート</p>
     <p>書いたコードを保管する場所。「いつ・誰が・何を変えたか」もすべて記録してくれる。</p>
   </div>
   <div class="role vercel">
     <div class="icon">🌐</div>
-    <h3>Vercel</h3>
+    <h3>Vercel <small style="font-weight:400;color:#6b7280;">／ バーセル</small></h3>
     <p class="sub">お店の人</p>
-    <p>倉庫からコードを受け取って、世界中からアクセスできる「お店（ウェブサイト）」として公開してくれる。</p>
+    <p>倉庫からコードを受け取って、ブラウザから使える「動くシステム（Web アプリ）」として稼働させてくれる。</p>
   </div>
 </div>
 
 <div class="callout tip">
-  <strong>ポイント：</strong>あなたは「依頼する人」。3 人がバトンをつないで、サイトを世に出してくれます。
+  <strong>ポイント：</strong>あなたは「依頼する人」。3 人がバトンをつないで、システムを動く状態にしてくれます。
+</div>
+
+<h3>🤖 ところで「Claude」には3つの顔があります</h3>
+<p>同じ Claude でも、使う場所によって名前と得意分野が違います。最初は混乱しがちなので整理しておきましょう。</p>
+
+<div class="roles">
+  <div class="role claude">
+    <div class="icon">💬</div>
+    <h3>Claude <small style="font-weight:400;color:#6b7280;">（クロード）</small></h3>
+    <p class="sub">ふつうの会話用</p>
+    <p><code>claude.ai</code> でブラウザから話しかける AI。文章作成・相談・調べもの向け。コードも書けるが「ファイルを直接編集」はできない。</p>
+  </div>
+  <div class="role claude">
+    <div class="icon">⌨️</div>
+    <h3>Claude Code <small style="font-weight:400;color:#6b7280;">（クロードコード）</small></h3>
+    <p class="sub">開発者の手元 PC 用</p>
+    <p>自分の PC のターミナルにインストールして使う CLI 版。<strong>ファイルを直接編集・コマンド実行・git 操作</strong>までできる。本格的な開発向け。</p>
+  </div>
+  <div class="role claude">
+    <div class="icon">☁️</div>
+    <h3>Claude Code on the Web <small style="font-weight:400;color:#6b7280;">（Cowork）</small></h3>
+    <p class="sub">クラウド版・スマホでも OK</p>
+    <p>ブラウザやスマホアプリから使えるクラウド型の Claude Code。<strong>PC に何もインストールせず</strong>、リポジトリを渡せばクラウド側で編集・push まで全部やってくれる。今このページもこれで作りました。</p>
+  </div>
+</div>
+
+<div class="callout">
+  <strong>使い分けの目安：</strong>
+  <ul style="margin: 8px 0 0;">
+    <li>💬 <strong>Claude</strong> → 雑談・相談・文章書き</li>
+    <li>⌨️ <strong>Claude Code</strong> → 自分の PC でガッツリ開発</li>
+    <li>☁️ <strong>Cowork</strong> → 出先・スマホ・PC のない人でも開発を回したい</li>
+  </ul>
 </div>
 
 <h2>2. 全体の流れを 1 枚の図で</h2>
-<p>あなたが「こうしたい」と言ってから、ネット上にサイトが出るまでの流れです。</p>
+<p>あなたが「こうしたい」と言ってから、システムが実際に動き出すまでの流れです。</p>
 
 <div class="diagram">
 <pre class="mermaid">
@@ -175,8 +252,8 @@ flowchart LR
     U(["👤 あなた<br/>『こうしたい』と話す"])
     C["🤖 Claude<br/>━━━━━━━<br/>大工さん<br/>コードを書く"]
     G["📦 GitHub<br/>━━━━━━━<br/>倉庫<br/>コードを保管"]
-    V["🌐 Vercel<br/>━━━━━━━<br/>お店の人<br/>サイトを公開"]
-    W(["🌍 訪問者<br/>サイトを見る"])
+    V["🌐 Vercel<br/>━━━━━━━<br/>お店の人<br/>システムを稼働"]
+    W(["🌍 利用者<br/>システムを使う"])
 
     U ==>|①依頼| C
     C ==>|②push<br/>送る| G
@@ -193,6 +270,18 @@ flowchart LR
 </div>
 
 <p>この流れの素敵なところは、<strong>あなたがやることは「Claude に話しかける」だけ</strong>で、残りは全部 3 人が裏で自動的に走ってくれる、ということです。</p>
+
+<div class="callout">
+  <strong>⚠ ただし「人間のチェック」は必要：</strong><br>
+  Claude も間違えます。GitHub も Vercel も「言われたとおりに動く」だけで、内容の良し悪しは判断しません。<br>
+  本番（main）に取り込む前に、必ず次のどれかで確認します:
+  <ul style="margin: 8px 0 0;">
+    <li>👀 <strong>プレビュー URL</strong> をブラウザで開いて見た目を確認</li>
+    <li>🤖 <strong>CI（自動テスト）</strong>が緑になっているか確認</li>
+    <li>🙋 <strong>Pull Request の差分</strong>を読んで「変なコード混じってないか」確認</li>
+  </ul>
+  「全自動で安心」ではなく「自動化されて<u>確認に集中できる</u>」が正しいイメージです。
+</div>
 
 <h2>3. なぜ 3 つ必要？ 役割分担の理由</h2>
 
@@ -227,7 +316,7 @@ flowchart LR
     end
     subgraph P["🌐 ③本番 (Vercel)"]
       direction TB
-      C1["🚀 動くサイト"]
+      C1["🚀 動くシステム"]
       C2["URL で誰でも<br/>アクセス可能"]
       C1 --- C2
     end
@@ -248,34 +337,125 @@ flowchart LR
 
 <h2>5. 用語集（日常の言葉で）</h2>
 
-<dl class="glossary">
-  <dt>リポジトリ (repository / repo)</dt>
-  <dd>📦 GitHub 上の「プロジェクト1個ぶんの箱」。サイトひとつにつき箱ひとつ、と思えば OK。</dd>
+<div class="terms">
 
-  <dt>commit（コミット）</dt>
-  <dd>📝「ここまでの変更を1つの区切りとして記録する」こと。日記に「今日やったこと」を書くイメージ。</dd>
+  <div class="term">
+    <div class="name">repository <small>／ リポジトリ・レポ</small></div>
+    <div class="visual">
+      <div class="box hi">📦<br>my-site</div>
+    </div>
+    <div class="desc">GitHub 上の<strong>プロジェクト1個ぶんの箱</strong>。システムひとつにつき箱ひとつ。</div>
+  </div>
 
-  <dt>push（プッシュ）</dt>
-  <dd>📤 手元の変更を GitHub の倉庫に「送る」こと。コミットしただけではまだ手元。push して初めて世界に届きます。</dd>
+  <div class="term">
+    <div class="name">commit <small>／ コミット</small></div>
+    <div class="visual">
+      <div class="box">変更①</div>
+      <div class="box">変更②</div>
+      <span class="arrow">→</span>
+      <div class="box hi">📸<br>記録</div>
+    </div>
+    <div class="desc">複数の変更を <strong>1つの区切りとして記録</strong>。日記に「今日やったこと」を書くイメージ。</div>
+  </div>
 
-  <dt>pull（プル）</dt>
-  <dd>📥 push の逆。GitHub にある最新を手元に「取ってくる」こと。</dd>
+  <div class="term">
+    <div class="name">push <small>／ プッシュ</small></div>
+    <div class="visual">
+      <div class="box">💻<br>手元</div>
+      <span class="arrow">📤→</span>
+      <div class="box ok">📦<br>GitHub</div>
+    </div>
+    <div class="desc">手元の変更を <strong>GitHub に送る</strong>。push して初めて世界に届きます。</div>
+  </div>
 
-  <dt>branch（ブランチ）</dt>
-  <dd>🌿 「お試し作業用の枝分かれ」。本番のコードを壊さずに新機能を試せる安全な作業場所。</dd>
+  <div class="term">
+    <div class="name">pull <small>／ プル</small></div>
+    <div class="visual">
+      <div class="box ok">📦<br>GitHub</div>
+      <span class="arrow">📥→</span>
+      <div class="box">💻<br>手元</div>
+    </div>
+    <div class="desc">push の逆。GitHub の最新を <strong>手元に取ってくる</strong>。</div>
+  </div>
 
-  <dt>merge（マージ）</dt>
-  <dd>🔀 枝分かれしていたブランチを「本流に合流」させること。OK が出た作業をみんなの本番コードに取り込む瞬間。</dd>
+  <div class="term">
+    <div class="name">main <small>／ メイン（旧: master）</small></div>
+    <div class="visual">
+      <div class="box ok" style="min-width:140px;">🟢 main<br/><small style="color:#6b7280;">＝本番用ブランチ</small></div>
+    </div>
+    <div class="desc">ブランチ名のひとつで、慣習的に <strong>本番用の本線</strong>として使う名前。昔は <code>master</code> だったが、現在の GitHub は新規リポジトリで <code>main</code> がデフォルト。古い案件では <code>master</code> のこともある。</div>
+  </div>
 
-  <dt>Pull Request (PR)</dt>
-  <dd>🙋「このブランチをマージしてもいいですか？」というお伺い。レビューや議論の場にもなる。</dd>
+  <div class="term">
+    <div class="name">branch <small>／ ブランチ</small></div>
+    <div class="visual" style="flex-direction:column; gap:4px;">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div class="box ok" style="min-width:120px;">🟢 main（本線）</div>
+      </div>
+      <div style="color:#6b7280;">↓ 枝分かれ</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div class="box warn" style="min-width:120px;">🟡 feature（脇道）</div>
+      </div>
+    </div>
+    <div class="desc"><strong>お試し作業用の枝分かれ</strong>。本番を壊さずに新機能を試せる安全な作業場所。</div>
+  </div>
 
-  <dt>deploy（デプロイ）</dt>
-  <dd>🚀 コードをサーバーに置いて「実際に動く状態にする」こと。Vercel がこれを自動でやってくれます。</dd>
+  <div class="term">
+    <div class="name">merge <small>／ マージ</small></div>
+    <div class="visual" style="flex-direction:column; gap:4px;">
+      <div style="display:flex; gap:8px;">
+        <div class="box warn">🟡 feature</div>
+        <div class="box ok">🟢 main</div>
+      </div>
+      <div style="color:#6b7280;">↓ 合流</div>
+      <div class="box ok" style="min-width:140px;">🟢 main（feature 取込済）</div>
+    </div>
+    <div class="desc">枝分かれを <strong>本線に合流</strong>。OK が出た作業を本番コードに取り込む瞬間。</div>
+  </div>
 
-  <dt>preview（プレビュー）</dt>
-  <dd>👀 本番に出す前に「こう見えますよ」と試せるお試し URL。Vercel はブランチごとにこれを自動で作ってくれます。</dd>
-</dl>
+  <div class="term">
+    <div class="name">Pull Request (PR) <small>／ プルリク</small></div>
+    <div class="visual">
+      <div class="box warn">🟡 feature</div>
+      <span class="arrow">🙋</span>
+      <div class="box ok">🟢 main</div>
+    </div>
+    <div class="desc">「<strong>このブランチを main にマージしていい？</strong>」というお伺い。差分の確認・議論の場にもなる。</div>
+  </div>
+
+  <div class="term">
+    <div class="name">deploy <small>／ デプロイ</small></div>
+    <div class="visual">
+      <div class="box ok">📦<br>コード</div>
+      <span class="arrow">🚀→</span>
+      <div class="box hi">🌐<br>動く<br>システム</div>
+    </div>
+    <div class="desc">コードを <strong>サーバーに置いて動かす</strong>こと。Vercel が自動でやってくれます。</div>
+  </div>
+
+  <div class="term">
+    <div class="name">preview <small>／ プレビュー</small></div>
+    <div class="visual">
+      <div class="box warn">🟡 feature</div>
+      <span class="arrow">→</span>
+      <div class="box hi">👀<br>お試し<br>URL</div>
+    </div>
+    <div class="desc">本番に出す前の <strong>確認用 URL</strong>。Vercel がブランチごとに自動で作ってくれます。</div>
+  </div>
+
+  <div class="term">
+    <div class="name">CI <small>／ シーアイ</small></div>
+    <div class="visual">
+      <div class="box">📦<br>変更</div>
+      <span class="arrow">🤖→</span>
+      <div class="box ok">✅<br>OK</div>
+      <span style="color:#6b7280;">or</span>
+      <div class="box" style="border-color:#dc2626; background:#fee2e2;">❌<br>NG</div>
+    </div>
+    <div class="desc">push のたびに自動で走る <strong>チェック係</strong>（テスト・ビルド等）。緑になればマージ OK の目安。</div>
+  </div>
+
+</div>
 
 <h2>6. ブランチとマージのイメージ</h2>
 
@@ -323,7 +503,7 @@ flowchart LR
   <div class="num">3</div>
   <div class="body">
     <h3>Claude にリポジトリを触ってもらう</h3>
-    <p>Claude Code（または Claude のウェブ版）にリポジトリを渡し、「こういうサイトを作って」と依頼。Claude がコードを書いて GitHub に push してくれます。</p>
+    <p>Claude Code（または Cowork / Claude のウェブ版）にリポジトリを渡し、「こういうシステムを作って」と依頼。Claude がコードを書いて GitHub に push してくれます。</p>
   </div>
 </div>
 <div class="step">
@@ -381,7 +561,166 @@ flowchart TB
   「Claude が書く → GitHub に push → Vercel が公開」
 </div>
 
-<h2>9. よくある質問</h2>
+<h2>9. Claude Code / Cowork の使い方の基本</h2>
+<p>実際にあなたが手を動かす部分は、ほぼ「Claude にチャットで指示するだけ」です。流れはこんな感じ:</p>
+
+<div class="step">
+  <div class="num">1</div>
+  <div class="body">
+    <h3>GitHub と接続する</h3>
+    <p>Claude Code (Cowork) を起動すると、最初に「どのリポジトリを触る？」と聞かれます。GitHub アカウントを連携し、対象のリポジトリを選ぶと、Claude がそのコードを読める状態になります。</p>
+  </div>
+</div>
+<div class="step">
+  <div class="num">2</div>
+  <div class="body">
+    <h3>「セッション」を 1 つ立ち上げる</h3>
+    <p>1 つの作業＝1 つのセッション。「お問い合わせフォームを追加して」と話しかけたらそれが 1 セッションです。Claude はその中で <strong>コードを読む → 書く → commit → push → PR 作成</strong> までやってくれます。</p>
+  </div>
+</div>
+<div class="step">
+  <div class="num">3</div>
+  <div class="body">
+    <h3>結果を確認・マージ</h3>
+    <p>Claude が PR を作ったら、Vercel のプレビュー URL で動作確認 → 問題なければマージ → 本番反映。</p>
+  </div>
+</div>
+
+<h3>🧠 「セッション」って何？ いちばん大事な概念</h3>
+
+<div class="diagram">
+<pre class="mermaid">
+flowchart TB
+    subgraph A["💬 セッション A (例: 朝の作業)"]
+      A1["指示: お問い合わせ追加"]
+      A2["Claude が記憶しながら作業"]
+      A3["PR 作成"]
+      A1 --> A2 --> A3
+    end
+    subgraph B["💬 セッション B (例: 夜の作業)"]
+      B1["指示: ロゴ変更"]
+      B2["A の記憶はゼロ"]
+      B3["別の PR"]
+      B1 --> B2 --> B3
+    end
+    A -.❌ 互いに知らない .-> B
+
+    style A fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    style B fill:#fef3ec,stroke:#d97757,stroke-width:2px
+</pre>
+</div>
+
+<p><strong>セッションは互いに完全に独立しています</strong>。A で「弊社の方針はこう」と説明しても、B では Claude はそれを知りません。毎回まっさらな状態から始まります。</p>
+
+<div class="callout tip">
+  <strong>イメージ：</strong>セッションは「会議室」。A 会議室で話したことは、B 会議室には伝わりません。
+</div>
+
+<h3>🔗 セッションをまたいで引き継ぐには「メモを残す」</h3>
+
+<div class="diagram">
+<pre class="mermaid">
+flowchart LR
+    A["💬 セッション A"]
+    M["📝 HANDOFF.md<br/>(リポジトリ内のメモ)"]
+    B["💬 セッション B"]
+
+    A ==>|"作業内容を<br/>書き残す"| M
+    M ==>|"起動時に<br/>自動で読む"| B
+
+    style A fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    style M fill:#fef9c3,stroke:#ca8a04,stroke-width:3px
+    style B fill:#fef3ec,stroke:#d97757,stroke-width:2px
+</pre>
+</div>
+
+<p>セッションは記憶を持ち越せませんが、<strong>リポジトリの中にメモを残しておけば</strong>次のセッションがそれを読んでくれます。よく使うのは:</p>
+
+<ul>
+  <li><code>CLAUDE.md</code> — プロジェクト全体のルール・方針（毎セッション必ず読まれる）</li>
+  <li><code>.claude/HANDOFF.md</code> — 「前回どこまでやった・次に何をする」の引き継ぎメモ</li>
+  <li>PR 説明文・コミットメッセージ — 過去の意図を残す</li>
+</ul>
+
+<div class="callout">
+  <strong>ポイント：</strong>「あれ、前回言ったのに…」と Claude にイラっとしたら、それは <u>メモを残し忘れている</u> サインです。重要なルールは <code>CLAUDE.md</code>、作業の続きは <code>HANDOFF.md</code> に書く癖をつけましょう。
+</div>
+
+<h3>💡 セッションを使い分けるコツ</h3>
+<table>
+  <thead><tr><th>こうしたい</th><th>セッションをどう使う？</th></tr></thead>
+  <tbody>
+    <tr><td>関連しない 2 つの作業を並行で進めたい</td><td>セッション A と B を別々に立てる。互いに干渉しないので安全。</td></tr>
+    <tr><td>長い作業を翌日に持ち越したい</td><td>セッション終了前に「HANDOFF.md に進捗を書いて」と頼む。</td></tr>
+    <tr><td>毎回必ず守ってほしいルールがある</td><td><code>CLAUDE.md</code> に書く。全セッションが起動時に読む。</td></tr>
+    <tr><td>1 つの作業がこじれて方向修正したい</td><td>同じセッションを続けるか、いっそ新セッションで「ゼロから違うアプローチで」と頼む。</td></tr>
+  </tbody>
+</table>
+
+<h3>🆕 新しいセッションはどう作る？</h3>
+<p>Cowork (Claude Code on the Web) の場合、左サイドバーの「<strong>New session</strong>」ボタンを押すだけ。リポジトリとブランチを選んで会話を始めれば、それで新セッション開始です。Claude Code (PC 版) なら、ターミナルで <code>claude</code> コマンドをもう 1 つ立ち上げれば別セッション。</p>
+
+<div class="callout tip">
+  <strong>コツ：</strong>テーマが変わったら新セッションを立てる。「フォーム追加」のあと「ロゴ変更」をするなら、新セッションのほうが Claude も混乱しません。
+</div>
+
+<h3>⚠ 同じセッションで延々作業するデメリット</h3>
+<table>
+  <thead><tr><th>起きること</th><th>影響</th></tr></thead>
+  <tbody>
+    <tr><td>コンテキスト（会話履歴）が膨らむ</td><td>古い情報が圧縮（要約）され、細かい指示が抜け落ちることがある</td></tr>
+    <tr><td>前の話題が引きずられる</td><td>「フォーム追加」の文脈で「ロゴ変更」を頼むと、フォーム関連のファイルを無駄に触ることがある</td></tr>
+    <tr><td>PR が肥大化</td><td>1 PR に複数テーマが混ざってレビューしにくくなる</td></tr>
+    <tr><td>応答が遅くなる</td><td>毎回大きな履歴を読み直すため</td></tr>
+  </tbody>
+</table>
+<p><strong>目安：</strong> 1 セッション＝1 PR＝1 テーマ。これを超えそうなら新セッションへ。</p>
+
+<h3>💥 セッションが切れる主な原因</h3>
+<ul>
+  <li><strong>無操作タイムアウト</strong>: しばらく放置するとクラウドの作業環境（コンテナ）が回収される（Cowork の場合）</li>
+  <li><strong>ブラウザを閉じた / 通信が切れた</strong>: 復帰できないことがある</li>
+  <li><strong>コンテキスト上限</strong>: 履歴が長すぎると自動圧縮されるが、極端に長いと続行困難に</li>
+  <li><strong>手動で終了</strong>: タブを閉じる・New session を始めるなど</li>
+  <li><strong>サービス側の不具合</strong>: 稀</li>
+</ul>
+
+<h3>🩹 セッションが切れたら何をする？</h3>
+
+<div class="diagram">
+<pre class="mermaid">
+flowchart LR
+    X["💥 セッション<br/>切れた"]
+    N["🆕 新セッション<br/>を立てる"]
+    R["📖 状況を読み込ませる<br/>(下記 3 つ)"]
+    G["✅ 続きから再開"]
+
+    X ==> N ==> R ==> G
+
+    style X fill:#fee2e2,stroke:#dc2626,stroke-width:2px
+    style N fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    style R fill:#fef9c3,stroke:#ca8a04,stroke-width:3px
+    style G fill:#dcfce7,stroke:#16a34a,stroke-width:2px
+</pre>
+</div>
+
+<ol>
+  <li><strong>同じリポジトリ・同じブランチ</strong>で新セッションを立てる（PR を作っていればその branch を指定）</li>
+  <li>新セッションに次を読ませる:
+    <ul>
+      <li><code>CLAUDE.md</code>（プロジェクト全体ルール、起動時に自動で読まれる）</li>
+      <li><code>.claude/HANDOFF.md</code>（前回の引き継ぎメモ、書いてあれば）</li>
+      <li>該当の PR や直近のコミットログ（「PR #27 の続きをやって」と伝えるだけで Claude が読みに行く）</li>
+    </ul>
+  </li>
+  <li>「ここまで進んだ。次は〇〇から」と一言添える</li>
+</ol>
+
+<div class="callout">
+  <strong>切れる前にやっておくと楽：</strong>大事な作業の節目で「<code>HANDOFF.md</code> に今の状況を書いて」と Claude に頼んでおく。これがセッションをまたぐ「保険」になります。
+</div>
+
+<h2>10. よくある質問</h2>
 
 <h3>Q. お金はかかる？</h3>
 <p>個人の練習レベルなら GitHub も Vercel も無料枠で十分です。Claude は有料プランが必要になることがあります。</p>
