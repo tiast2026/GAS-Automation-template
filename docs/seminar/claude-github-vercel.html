@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Claude × GitHub × Vercel ことはじめ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --card: #ffffff;
+    --ink: #1f2328;
+    --muted: #6b7280;
+    --accent: #5b8def;
+    --claude: #d97757;
+    --github: #24292f;
+    --vercel: #000000;
+    --border: #e5e7eb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.75;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 40px 24px 80px; }
+  header {
+    text-align: center;
+    padding: 32px 0 24px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 40px;
+  }
+  h1 { font-size: 2rem; margin: 0 0 8px; }
+  .lead { color: var(--muted); margin: 0; }
+  h2 {
+    font-size: 1.4rem;
+    margin: 56px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 { font-size: 1.1rem; margin: 28px 0 8px; }
+  .roles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+  @media (max-width: 640px) { .roles { grid-template-columns: 1fr; } }
+  .role {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .role .icon { font-size: 2.2rem; }
+  .role h3 { margin: 8px 0 4px; }
+  .role .sub { color: var(--muted); font-size: 0.9rem; margin: 0 0 8px; }
+  .role.claude { border-top: 4px solid var(--claude); }
+  .role.github { border-top: 4px solid var(--github); }
+  .role.vercel { border-top: 4px solid var(--vercel); }
+  .diagram {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 16px 0;
+    text-align: center;
+    overflow-x: auto;
+  }
+  .callout {
+    background: #fff7ed;
+    border-left: 4px solid #f59e0b;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 16px 0;
+  }
+  .callout.tip { background: #ecfdf5; border-color: #10b981; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; background: var(--card); border-radius: 8px; overflow: hidden; }
+  th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: #f3f4f6; font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  code {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+    font-family: "SF Mono", Consolas, monospace;
+  }
+  .glossary dt {
+    font-weight: 700;
+    margin-top: 16px;
+    color: var(--accent);
+  }
+  .glossary dd { margin: 4px 0 0 0; }
+  .step {
+    display: flex;
+    gap: 16px;
+    margin: 16px 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .step .num {
+    flex: 0 0 36px;
+    height: 36px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+  .step .body { flex: 1; }
+  .step h3 { margin: 0 0 4px; }
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Claude × GitHub × Vercel ことはじめ</h1>
+  <p class="lead">3つの道具がどう協力して「サイトが公開される」までを作るか、図でわかる入門ガイド</p>
+</header>
+
+<h2>1. まず、登場人物は3人だけ</h2>
+<p>難しく考えなくて大丈夫です。家を建てるのに「大工さん・倉庫・お店の人」がいるのと同じで、ウェブサイトを作って公開するにも 3 つの役割があります。</p>
+
+<div class="roles">
+  <div class="role claude">
+    <div class="icon">🤖</div>
+    <h3>Claude</h3>
+    <p class="sub">大工さん</p>
+    <p>あなたの指示でコードを書いてくれる AI。設計図どおりに「家（コード）」を組み立てる職人さん。</p>
+  </div>
+  <div class="role github">
+    <div class="icon">📦</div>
+    <h3>GitHub</h3>
+    <p class="sub">倉庫＆履歴ノート</p>
+    <p>書いたコードを保管する場所。「いつ・誰が・何を変えたか」もすべて記録してくれる。</p>
+  </div>
+  <div class="role vercel">
+    <div class="icon">🌐</div>
+    <h3>Vercel</h3>
+    <p class="sub">お店の人</p>
+    <p>倉庫からコードを受け取って、世界中からアクセスできる「お店（ウェブサイト）」として公開してくれる。</p>
+  </div>
+</div>
+
+<div class="callout tip">
+  <strong>ポイント：</strong>あなたは「依頼する人」。3 人がバトンをつないで、サイトを世に出してくれます。
+</div>
+
+<h2>2. 全体の流れを 1 枚の図で</h2>
+<p>あなたが「こうしたい」と言ってから、ネット上にサイトが出るまでの流れです。</p>
+
+<div class="diagram">
+<pre class="mermaid">
+flowchart LR
+    U([👤 あなた]) -->|やりたいことを伝える| C[🤖 Claude]
+    C -->|コードを書く・保存する<br/>= push| G[📦 GitHub]
+    G -->|変更を通知| V[🌐 Vercel]
+    V -->|自動で公開| W([🌍 世界中の人が<br/>サイトを見られる])
+
+    style C fill:#fef3ec,stroke:#d97757,stroke-width:2px
+    style G fill:#f4f4f5,stroke:#24292f,stroke-width:2px
+    style V fill:#fafafa,stroke:#000,stroke-width:2px
+</pre>
+</div>
+
+<p>この流れの素敵なところは、<strong>あなたがやることは「Claude に話しかける」だけ</strong>で、残りは全部 3 人が裏で自動的に走ってくれる、ということです。</p>
+
+<h2>3. なぜ 3 つ必要？ 役割分担の理由</h2>
+
+<table>
+  <thead><tr><th>もし無かったら…</th><th>こうなる</th></tr></thead>
+  <tbody>
+    <tr><td>Claude が無い</td><td>コードを全部自分で書くことになる。時間も知識も必要。</td></tr>
+    <tr><td>GitHub が無い</td><td>コードが自分のパソコンの中だけ。壊れたら終わり。誰とも共有できない。</td></tr>
+    <tr><td>Vercel が無い</td><td>コードはあるけど、サーバーを自分で借りて設定しないと公開できない。</td></tr>
+  </tbody>
+</table>
+
+<p>つまり 3 つ揃うと、<strong>「思いつく → 形になる → 公開される」が一直線</strong>になります。</p>
+
+<h2>4. 「あれ、保存ってどこにされるの？」</h2>
+<p>初心者がいちばん混乱するポイントです。3 つの保存場所をはっきりさせましょう。</p>
+
+<div class="diagram">
+<pre class="mermaid">
+flowchart TB
+    subgraph L[💻 あなたのPC または Claude の作業場]
+      A[書きかけのコード]
+    end
+    subgraph H[📦 GitHub のクラウド]
+      B[保存・履歴あり]
+    end
+    subgraph P[🌐 Vercel のサーバー]
+      C[公開中のサイト]
+    end
+
+    A -->|commit + push| B
+    B -->|自動デプロイ| C
+
+    style L fill:#fff7ed
+    style H fill:#f0f9ff
+    style P fill:#f0fdf4
+</pre>
+</div>
+
+<p>順番に「左 → 中央 → 右」へ流れていく、と覚えれば OK。</p>
+
+<h2>5. 用語集（日常の言葉で）</h2>
+
+<dl class="glossary">
+  <dt>リポジトリ (repository / repo)</dt>
+  <dd>📦 GitHub 上の「プロジェクト1個ぶんの箱」。サイトひとつにつき箱ひとつ、と思えば OK。</dd>
+
+  <dt>commit（コミット）</dt>
+  <dd>📝「ここまでの変更を1つの区切りとして記録する」こと。日記に「今日やったこと」を書くイメージ。</dd>
+
+  <dt>push（プッシュ）</dt>
+  <dd>📤 手元の変更を GitHub の倉庫に「送る」こと。コミットしただけではまだ手元。push して初めて世界に届きます。</dd>
+
+  <dt>pull（プル）</dt>
+  <dd>📥 push の逆。GitHub にある最新を手元に「取ってくる」こと。</dd>
+
+  <dt>branch（ブランチ）</dt>
+  <dd>🌿 「お試し作業用の枝分かれ」。本番のコードを壊さずに新機能を試せる安全な作業場所。</dd>
+
+  <dt>merge（マージ）</dt>
+  <dd>🔀 枝分かれしていたブランチを「本流に合流」させること。OK が出た作業をみんなの本番コードに取り込む瞬間。</dd>
+
+  <dt>Pull Request (PR)</dt>
+  <dd>🙋「このブランチをマージしてもいいですか？」というお伺い。レビューや議論の場にもなる。</dd>
+
+  <dt>deploy（デプロイ）</dt>
+  <dd>🚀 コードをサーバーに置いて「実際に動く状態にする」こと。Vercel がこれを自動でやってくれます。</dd>
+
+  <dt>preview（プレビュー）</dt>
+  <dd>👀 本番に出す前に「こう見えますよ」と試せるお試し URL。Vercel はブランチごとにこれを自動で作ってくれます。</dd>
+</dl>
+
+<h2>6. ブランチとマージのイメージ</h2>
+
+<div class="diagram">
+<pre class="mermaid">
+gitGraph
+    commit id: "サイト公開"
+    commit id: "お知らせ追加"
+    branch feature
+    checkout feature
+    commit id: "新ページ作成中"
+    commit id: "デザイン調整"
+    checkout main
+    merge feature id: "OK→本番反映"
+    commit id: "次の改修へ"
+</pre>
+</div>
+
+<p>左から右へ時間が流れています。下の <code>feature</code> 枝で安全に作業して、できたら本流（<code>main</code>）に合流（マージ）する、という流れ。</p>
+
+<h2>7. つなぎ方（セットアップの全体像）</h2>
+
+<div class="step">
+  <div class="num">1</div>
+  <div class="body">
+    <h3>GitHub にアカウントを作って、リポジトリ（箱）を1つ作る</h3>
+    <p>無料で OK。これが「コードの倉庫」になります。</p>
+  </div>
+</div>
+<div class="step">
+  <div class="num">2</div>
+  <div class="body">
+    <h3>Vercel にアカウントを作って、GitHub と連携する</h3>
+    <p>「GitHub でログイン」を選び、さっき作ったリポジトリを Vercel に紐づけます。これで <strong>GitHub に push されると Vercel が自動で気づく</strong>ようになります。</p>
+  </div>
+</div>
+<div class="step">
+  <div class="num">3</div>
+  <div class="body">
+    <h3>Claude にリポジトリを触ってもらう</h3>
+    <p>Claude Code（または Claude のウェブ版）にリポジトリを渡し、「こういうサイトを作って」と依頼。Claude がコードを書いて GitHub に push してくれます。</p>
+  </div>
+</div>
+<div class="step">
+  <div class="num">4</div>
+  <div class="body">
+    <h3>あとは自動！</h3>
+    <p>push されると Vercel が検知 → ビルド → 公開 URL に反映。あなたはブラウザで結果を確認するだけ。</p>
+  </div>
+</div>
+
+<h2>8. つながり全体図（まとめ）</h2>
+
+<div class="diagram">
+<pre class="mermaid">
+flowchart LR
+    U([👤 あなた])
+    subgraph CL[🤖 Claude]
+      C1[コードを書く]
+      C2[commit して push]
+    end
+    subgraph GH[📦 GitHub]
+      G1[main ブランチ]
+      G2[feature ブランチ]
+      G2 -.merge.-> G1
+    end
+    subgraph VC[🌐 Vercel]
+      V1[プレビュー URL]
+      V2[本番 URL]
+    end
+
+    U -->|依頼| C1
+    C1 --> C2
+    C2 --> G2
+    G2 --> V1
+    G1 --> V2
+
+    style CL fill:#fef3ec
+    style GH fill:#f4f4f5
+    style VC fill:#fafafa
+</pre>
+</div>
+
+<div class="callout">
+  <strong>覚えてほしいのは1行だけ：</strong><br>
+  「Claude が書く → GitHub に push → Vercel が公開」
+</div>
+
+<h2>9. よくある質問</h2>
+
+<h3>Q. お金はかかる？</h3>
+<p>個人の練習レベルなら GitHub も Vercel も無料枠で十分です。Claude は有料プランが必要になることがあります。</p>
+
+<h3>Q. 間違えて変なコードを push したら？</h3>
+<p>GitHub は履歴を全部覚えているので、いつでも「前の状態に戻す」ことができます。これが GitHub を使う一番のメリットです。</p>
+
+<h3>Q. Vercel じゃないとダメ？</h3>
+<p>同じ役割をする会社は他にもあります（Netlify, Cloudflare Pages など）。Vercel は GitHub との連携がいちばん簡単なので入門におすすめ。</p>
+
+<footer>
+  セミナー資料 / Claude × GitHub × Vercel 入門
+</footer>
+
+</div>
+</body>
+</html>
