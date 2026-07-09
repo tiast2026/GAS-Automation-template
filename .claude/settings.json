@@ -10,7 +10,8 @@
       "Bash(curl *)",
       "Bash(bash scripts/call-dispatcher.sh *)",
       "Bash(bash scripts/sync-bound-scripts.sh *)",
-      "Bash(bash scripts/register-sheet-script.sh *)"
+      "Bash(bash scripts/register-sheet-script.sh *)",
+      "mcp__Claude_Code_Remote"
     ]
   },
   "hooks": {
